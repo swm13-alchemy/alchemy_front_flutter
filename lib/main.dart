@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:flutter/services.dart';
 
 void main() {
   runApp(
@@ -19,13 +20,18 @@ class WebViewApp extends StatefulWidget {
 class _WebViewAppState extends State<WebViewApp> {
   @override
   Widget build(BuildContext context) {
+
+    final double statusBarSize = MediaQuery.of(context).padding.top;
+
     return Scaffold(
       // appBar: AppBar(
       //   title: const Text('Flutter WebView'),
       // ),
-      body: const WebView(
-        initialUrl: 'https://alchemy-front-web.vercel.app/',
-      ),
+      body: SafeArea(
+        child: const WebView(
+          initialUrl: 'https://alchemy-front-web.vercel.app/',
+        )
+      )
     );
   }
 }
