@@ -20,16 +20,11 @@ class WebViewApp extends StatefulWidget {
 class _WebViewAppState extends State<WebViewApp> {
   @override
   Widget build(BuildContext context) {
-
-    final double statusBarSize = MediaQuery.of(context).padding.top;
-
     return Scaffold(
-      // appBar: AppBar(
-      //   title: const Text('Flutter WebView'),
-      // ),
       body: SafeArea(
         child: const WebView(
           initialUrl: 'https://alchemy-front-web.vercel.app/',
+          javascriptMode: JavascriptMode.unrestricted,
         )
       )
     );
