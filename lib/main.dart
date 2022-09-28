@@ -18,15 +18,41 @@ class WebViewApp extends StatefulWidget {
 }
 
 class _WebViewAppState extends State<WebViewApp> {
+  WebViewController? controller;
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: const WebView(
-          initialUrl: 'https://alchemy-front-web.vercel.app/',
-          javascriptMode: JavascriptMode.unrestricted,
+    return WillPopScope(
+      child: SafeArea(
+        child: Scaffold(
+          body: WebView(
+            onWebViewCreated: (WebViewController controller) {
+              this.controller = controller;
+            },
+            initialUrl: 'https://alchemy-front-web.vercel.app/',
+            javascriptMode: JavascriptMode.unrestricted,
+          )
         )
-      )
+      ),
+      onWillPop: () {
+        var future = controller!.canGoBack();
+        future.then((cnaGoBack) {
+          if (cnaGoBack) {
+            controller!.goBack();
+          } else {
+            SystemNavigator.pop();
+          }
+        });
+        return Future.value(false);
+      }
     );
   }
 }
+// const Scaffold(
+//   body: SafeArea(
+//     child: WebView(
+//       initialUrl: 'https://alchemy-front-web.vercel.app/',
+//       javascriptMode: JavascriptMode.unrestricted,
+//     )
+//   )
+// );
