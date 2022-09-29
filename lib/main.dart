@@ -229,6 +229,15 @@ class _WebViewAppState extends State<WebViewApp> with WidgetsBindingObserver {
                               message: data['message']
                           ));
                         }
+                    ),
+                    // 알림 삭제 채널
+                    JavascriptChannel(
+                      name: 'DeleteWeeklyNotification',
+                      onMessageReceived: (JavascriptMessage message) async {
+                        var data = jsonDecode(message.message);
+
+                        await _cancelNotification(data['pillId']);
+                      }
                     )
                   },
                 )
