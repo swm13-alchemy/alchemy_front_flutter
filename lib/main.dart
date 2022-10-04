@@ -8,6 +8,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_native_timezone/flutter_native_timezone.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
+import 'package:permission_handler/permission_handler.dart';
 
 void main() {
   runApp(
@@ -79,17 +80,17 @@ class _WebViewAppState extends State<WebViewApp> with WidgetsBindingObserver {
     await _flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
 
-  // 이전에 등록된 모든 메시지 취소
+  /// 이전에 등록된 모든 메시지 취소 함수
   Future<void> _cancelAllNotification() async {
     await _flutterLocalNotificationsPlugin.cancelAll();
   }
 
-  // 파라매터로 받은 id의 메시지만 취소
+  /// 파라매터로 받은 id의 메시지만 취소하는 함수
   Future<void> _cancelNotification(int id) async {
     await _flutterLocalNotificationsPlugin.cancel(id);
   }
 
-  // iOS의 푸시 메시지 권한 요청 (한 번 확인하면 다시 권한을 요청하지 않음)
+  /// iOS의 푸시 메시지 권한 요청하는 함수 (한 번 확인하면 다시 권한을 요청하지 않음)
   Future<void> _requestPermissions() async {
     await _flutterLocalNotificationsPlugin
         .resolvePlatformSpecificImplementation<
@@ -101,7 +102,7 @@ class _WebViewAppState extends State<WebViewApp> with WidgetsBindingObserver {
     );
   }
 
-  // 주간으로 알림을 보내주는 함수
+  /// 주간으로 알림을 보내주는 함수
   Future<void> _addWeeklyNotification({
     required int pillId,
     required List<int> intakeDays,
@@ -142,6 +143,7 @@ class _WebViewAppState extends State<WebViewApp> with WidgetsBindingObserver {
     );
   }
 
+  /// 다음 알림이 울려야 할 적절한 '시간'을 찾는 함수 (_nextInstanceOfDateTime 함수를 호출)
   tz.TZDateTime _nextInstanceOfTime(List<int> intakeDays, List<List<int>> intakeTimes) {
     final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
     tz.TZDateTime scheduledDate = _nextInstanceOfDateTime(intakeDays, now);
@@ -172,6 +174,7 @@ class _WebViewAppState extends State<WebViewApp> with WidgetsBindingObserver {
     return scheduledDate;
   }
 
+  /// 다음 알림이 울려야 할 적절한 '날짜'를 찾는 함수
   tz.TZDateTime _nextInstanceOfDateTime(List<int> intakeDays, tz.TZDateTime now) {
     tz.TZDateTime scheduledDate = tz.TZDateTime(tz.local, now.year, now.month, now.day);
     // 현재 scheduledDate의 날짜가 days 리스트에 해당하는 요일이 아니거나, 오늘보다 이전의 날짜일 경우 하루를 계속해서 더함 (이 로직으로 지정된 요일에 알림을 줌)
@@ -182,8 +185,21 @@ class _WebViewAppState extends State<WebViewApp> with WidgetsBindingObserver {
     return scheduledDate;
   }
 
+  /// 카메라에 대한 권한을 얻는 함수
+  Future<bool> requestCameraPermission() async {
+    Map<Permission, PermissionStatus> statuses =
+    await [Permission.storage, Permission.camera].request();
 
-  WebViewController? controller;
+    if (await Permission.camera.isGranted &&
+        await Permission.storage.isGranted) {
+      return Future.value(true);
+    } else {
+      return Future.value(false);
+    }
+  }
+
+
+  WebViewController? _controller;
 
   @override
   Widget build(BuildContext context) {
@@ -192,7 +208,7 @@ class _WebViewAppState extends State<WebViewApp> with WidgetsBindingObserver {
             child: Scaffold(
                 body: WebView(
                   onWebViewCreated: (WebViewController controller) {
-                    this.controller = controller;
+                    this._controller = controller;
                   },
                   initialUrl: 'https://alchemy-front-web.vercel.app/',
                   javascriptMode: JavascriptMode.unrestricted,
@@ -238,16 +254,29 @@ class _WebViewAppState extends State<WebViewApp> with WidgetsBindingObserver {
 
                         await _cancelNotification(data['pillId']);
                       }
+                    ),
+                    // 필렌즈 카메라, 앨범 접근 권한 얻기 채널
+                    JavascriptChannel(
+                      name: 'RequestCameraPermission',
+                      onMessageReceived: (JavascriptMessage message) async {
+                        await requestCameraPermission()
+                            .then((value) => {
+                              if (value) {
+                                /// TODO: 이거 추후 permission 허용 했을 때 페이지 넘어가도록 처리 해야함.. 현재 runJavascript가 안먹힘...
+                                // _controller!.runJavascript('')
+                              }
+                        });
+                      }
                     )
                   },
                 )
             )
         ),
         onWillPop: () {
-          var future = controller!.canGoBack();
+          var future = _controller!.canGoBack();
           future.then((cnaGoBack) {
             if (cnaGoBack) {
-              controller!.goBack();
+              _controller!.goBack();
             } else {
               SystemNavigator.pop();
             }
