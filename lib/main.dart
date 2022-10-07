@@ -210,7 +210,7 @@ class _WebViewAppState extends State<WebViewApp> with WidgetsBindingObserver {
                   onWebViewCreated: (WebViewController controller) {
                     this._controller = controller;
                   },
-                  initialUrl: 'https://alchemy-front-web.vercel.app/',
+                  initialUrl: 'https://www.beehealer.com',
                   javascriptMode: JavascriptMode.unrestricted,
                   javascriptChannels: { // javascript bridge
                     // 알림 추가 채널
