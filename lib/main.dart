@@ -212,6 +212,7 @@ class _WebViewAppState extends State<WebViewApp> with WidgetsBindingObserver {
                   },
                   initialUrl: 'https://www.beehealer.com',
                   javascriptMode: JavascriptMode.unrestricted,
+                  zoomEnabled: false,
                   javascriptChannels: { // javascript bridge
                     // 알림 추가 채널
                     JavascriptChannel(
