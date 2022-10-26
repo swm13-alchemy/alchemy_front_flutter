@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -211,6 +212,10 @@ class _WebViewAppState extends State<WebViewApp> with WidgetsBindingObserver {
                     this._controller = controller;
                   },
                   initialUrl: 'https://www.beehealer.com',
+                  userAgent: Platform.isIOS ? 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_1_2 like Mac OS X) AppleWebKit/605.1.15' +
+                      ' (KHTML, like Gecko) Version/13.0.1 Mobile/15E148 Safari/604.1' :
+                  'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) ' +
+                      'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Mobile Safari/537.36',
                   javascriptMode: JavascriptMode.unrestricted,
                   zoomEnabled: false,
                   javascriptChannels: { // javascript bridge
